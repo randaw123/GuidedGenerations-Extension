@@ -20,7 +20,7 @@ const stateGuide = async (isAuto = false) => {
     const genCommandSuffix = extension_settings[extensionName]?.promptState ?? defaultPrompt;
 
     const depth = extension_settings[extensionName]?.depthPromptState ?? 1;
-    const finalCommand = `/inject id=state position=chat scan=true depth=${depth} role=${injectionRole} [Relevant Informations for portraying characters {{pipe}}] |`;
+    const finalCommand = `/inject id=state position=chat scan=false depth=${depth} role=${injectionRole} [Relevant Informations for portraying characters {{pipe}}] |`;
 
     return await runGuideScript({
         guideId: 'state',
