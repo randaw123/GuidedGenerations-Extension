@@ -233,7 +233,7 @@ export default async function trackerGuide() {
 			if (initialFormat.trim()) {
 				try {
 					await context.executeSlashCommandsWithOptions(
-						`/inject id=tracker position=chat scan=true depth=0 role=system ${initialFormat}`,
+						`/inject id=tracker position=chat scan=false depth=0 role=system ${initialFormat}`,
 						{ showOutput: false, handleExecutionErrors: true }
 					);
 					debugLog('[TrackerGuide] Tracker setup completed');

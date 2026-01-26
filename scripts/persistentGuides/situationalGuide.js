@@ -16,7 +16,7 @@ const situationalGuide = async (isAuto = false) => {
 Keep the overview factual and neutral without speculation. Format in clear paragraphs.] |`;
     const genCommandSuffix = extension_settings[extensionName]?.promptSituational ?? defaultPrompt;
     const depth = extension_settings[extensionName]?.depthPromptSituational ?? 3;
-    const finalCommand = `/inject id=situational position=chat scan=true depth=${depth} [Current Situation: {{pipe}}] |`;
+    const finalCommand = `/inject id=situational position=chat scan=false depth=${depth} [Current Situation: {{pipe}}] |`;
     return await runGuideScript({
         guideId: 'situational',
         genCommandSuffix,

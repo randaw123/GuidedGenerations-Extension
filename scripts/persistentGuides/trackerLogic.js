@@ -167,7 +167,7 @@ export async function executeTracker(isAuto = false, force = false) {
 
         // Step 3: Update the tracker injection
         if (trackerUpdate && trackerUpdate.trim()) {
-            const injectionCommand = `/inject id=tracker position=chat scan=true depth=1 role=system [Tracker Information ${trackerUpdate}]`;
+            const injectionCommand = `/inject id=tracker position=chat scan=false depth=1 role=system [Tracker Information ${trackerUpdate}]`;
             await context.executeSlashCommandsWithOptions(injectionCommand, { 
                 showOutput: false, 
                 handleExecutionErrors: true 

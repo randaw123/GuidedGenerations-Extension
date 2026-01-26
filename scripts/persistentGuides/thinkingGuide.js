@@ -17,7 +17,7 @@ const thinkingGuide = async (isAuto = false) => {
     let genCommandSuffix = extension_settings[extensionName]?.promptThinking ?? `[OOC: Answer me out of Character! Write what each characters in the current scene are currently thinking, pure thought only. Do NOT continue the story or include narration or dialogue. Do not include the⁣ {{user}}'s thoughts.]`;
     const injectLabel = `Characters are currently thinking: {{pipe}}`;
     const depth = extension_settings[extensionName]?.depthPromptThinking ?? 0;
-    const finalCommand = `/inject id=thinking position=chat scan=true depth=${depth} role=${injectionRole} [${injectLabel}] |`;
+    const finalCommand = `/inject id=thinking position=chat scan=false depth=${depth} role=${injectionRole} [${injectLabel}] |`;
 
     return await runGuideScript({
         guideId: 'thinking',
