@@ -17,7 +17,7 @@ const rulesGuide = async (isAuto = false) => {
     const genCommandSuffix = promptTemplate;
     const depth = extension_settings[extensionName]?.depthPromptRules ?? 0;
     const injectionPrompt = await getPromptValue('persistentGuides.rulesInjection', '');
-    const finalCommand = `/inject id=rules position=chat scan=true depth=${depth} role=${injectionRole} ${injectionPrompt} |`;
+    const finalCommand = `/inject id=rules position=chat scan=false depth=${depth} role=${injectionRole} ${injectionPrompt} |`;
     return await runGuideScript({
         guideId: 'rules',
         genCommandSuffix,

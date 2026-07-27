@@ -19,7 +19,7 @@ const thinkingGuide = async (isAuto = false) => {
     });
     const injectionPrompt = await getPromptValue('persistentGuides.thinkingInjection', '');
     const depth = extension_settings[extensionName]?.depthPromptThinking ?? 0;
-    const finalCommand = `/inject id=thinking position=chat scan=true depth=${depth} role=${injectionRole} ${injectionPrompt} |`;
+    const finalCommand = `/inject id=thinking position=chat scan=false depth=${depth} role=${injectionRole} ${injectionPrompt} |`;
 
     return await runGuideScript({
         guideId: 'thinking',

@@ -25,7 +25,7 @@ const customAutoGuide = async (isAuto = false) => {
     // Using a generic final command, adjust if specific formatting is needed
     const depth = extension_settings[extensionName]?.depthPromptCustomAuto ?? 1;
     const injectionPrompt = await getPromptValue('persistentGuides.customAutoInjection', '');
-    const finalCommand = `/inject id=customAuto position=chat scan=true depth=${depth} role=${injectionRole} ${injectionPrompt} |`;
+    const finalCommand = `/inject id=customAuto position=chat scan=false depth=${depth} role=${injectionRole} ${injectionPrompt} |`;
 
     return await runGuideScript({
         guideId: 'customAuto',

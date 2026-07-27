@@ -17,7 +17,7 @@ const clothesGuide = async (isAuto = false) => {
     });
     const depth = extension_settings[extensionName]?.depthPromptClothes ?? 1;
     const injectionPrompt = await getPromptValue('persistentGuides.clothesInjection', '');
-    const finalCommand = `/inject id=clothes position=chat scan=true depth=${depth} role=${injectionRole} ${injectionPrompt} |`;
+    const finalCommand = `/inject id=clothes position=chat scan=false depth=${depth} role=${injectionRole} ${injectionPrompt} |`;
     return await runGuideScript({
         guideId: 'clothes',
         genAs,

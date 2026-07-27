@@ -270,7 +270,7 @@ export default async function trackerGuide() {
 						// Update the tracker injection with the clean tracker content
 						const injectionTemplate = await getPromptValue('tracker.trackerInjection', '');
 						const injectionPrompt = injectionTemplate.replaceAll('{{tracker}}', cleanTrackerContent);
-						const injectionCommand = `/inject id=tracker position=chat scan=true depth=1 role=system ${injectionPrompt}`;
+						const injectionCommand = `/inject id=tracker position=chat scan=false depth=1 role=system ${injectionPrompt}`;
 						await context.executeSlashCommandsWithOptions(injectionCommand, { 
 							showOutput: false, 
 							handleExecutionErrors: true 

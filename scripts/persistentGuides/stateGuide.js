@@ -22,7 +22,7 @@ const stateGuide = async (isAuto = false) => {
 
     const depth = extension_settings[extensionName]?.depthPromptState ?? 1;
     const injectionPrompt = await getPromptValue('persistentGuides.stateInjection', '');
-    const finalCommand = `/inject id=state position=chat scan=true depth=${depth} role=${injectionRole} ${injectionPrompt} |`;
+    const finalCommand = `/inject id=state position=chat scan=false depth=${depth} role=${injectionRole} ${injectionPrompt} |`;
 
     return await runGuideScript({
         guideId: 'state',

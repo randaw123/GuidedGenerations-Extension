@@ -164,7 +164,7 @@ export async function executeTracker(isAuto = false, force = false) {
         if (trackerUpdate && trackerUpdate.trim()) {
             const injectionTemplate = await getPromptValue('tracker.trackerInjection', '');
             const injectionPrompt = fillPromptTemplate(injectionTemplate, { tracker: trackerUpdate });
-            const injectionCommand = `/inject id=tracker position=chat scan=true depth=1 role=system ${injectionPrompt}`;
+            const injectionCommand = `/inject id=tracker position=chat scan=false depth=1 role=system ${injectionPrompt}`;
             await context.executeSlashCommandsWithOptions(injectionCommand, { 
                 showOutput: false, 
                 handleExecutionErrors: true 

@@ -13,7 +13,7 @@ const situationalGuide = async (isAuto = false) => {
     });
     const depth = extension_settings[extensionName]?.depthPromptSituational ?? 3;
     const injectionPrompt = await getPromptValue('persistentGuides.situationalInjection', '');
-    const finalCommand = `/inject id=situational position=chat scan=true depth=${depth} ${injectionPrompt} |`;
+    const finalCommand = `/inject id=situational position=chat scan=false depth=${depth} ${injectionPrompt} |`;
     return await runGuideScript({
         guideId: 'situational',
         genCommandSuffix,

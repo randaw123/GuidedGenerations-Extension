@@ -196,7 +196,7 @@ export class EditGuidesPopup {
             const role = extension_settings[extensionName]?.injectionEndRole ?? 'system';
             const context = SillyTavern.getContext();
             try {
-                await context.executeSlashCommandsWithOptions(`/inject id=custom_${newName} position=chat scan=true depth=${newDepth} role=${role} .|`, { showOutput: false });
+                await context.executeSlashCommandsWithOptions(`/inject id=custom_${newName} position=chat scan=false depth=${newDepth} role=${role} .|`, { showOutput: false });
                 const key = `script_inject_custom_${newName}`;
                 this.injectionData[key] = { value: '', depth: newDepth, position: 1 }; // Default to 'In Chat'
                 // Persist new injection
@@ -273,7 +273,7 @@ export class EditGuidesPopup {
 
                 const injectionTemplate = await getPromptValue('editGuides.generatedGuideInjection', '');
                 const injectionPrompt = fillPromptTemplate(injectionTemplate, { generatedGuide });
-                const script = `/inject id=custom_${newName} position=chat scan=true depth=${newDepth} role=${role} ${injectionPrompt} | /listinjects |`;
+                const script = `/inject id=custom_${newName} position=chat scan=false depth=${newDepth} role=${role} ${injectionPrompt} | /listinjects |`;
                 await context.executeSlashCommandsWithOptions(script, { showOutput: false });
                 this.close();
             } catch (err) {
