@@ -3,6 +3,7 @@
     <div class="inline-drawer">
         <div class="inline-drawer-toggle inline-drawer-header">
             <b>Guided Generations Settings</b>
+            <span id="gg_versionBadge" class="gg-version-badge" title="Installed version (from manifest.json)">v?</span>
 			<div class="inline-drawer-icon fa-solid fa-circle-chevron-down down"></div>
         </div>
         <div class="inline-drawer-content">
@@ -72,6 +73,12 @@
                 </div>
                 <div class="setting_item">
                     <div style="display: flex; align-items: center; margin-bottom: 5px;">
+                        <input type="checkbox" id="gg_showSeparatedThinkingButton" name="showSeparatedThinkingButton" class="gg-setting-input">
+                        <label for="gg_showSeparatedThinkingButton" style="margin-left: 8px;">Show Separated Thinking Button</label>
+                    </div>
+                </div>
+                <div class="setting_item">
+                    <div style="display: flex; align-items: center; margin-bottom: 5px;">
                         <input type="checkbox" id="gg_showSpellcheckerButton" name="showSpellcheckerButton" class="gg-setting-input">
                         <label for="gg_showSpellcheckerButton" style="margin-left: 8px;">Show Spellchecker Button</label>
                     </div>
@@ -134,7 +141,7 @@
                 <hr>
                 <h4>Auto-Triggers (Persistent Guides)</h4> <!-- Heading for Auto-Triggers -->
                 <small class="setting_item_description">
-                    Auto Triggered Guides automatically run when you use a the vanilla Send command from ST and on Guided Response before the Response is being generated. They do not run on swipes (where it is expected that they have already run on the initial response and are current).
+                    Auto Triggered Guides automatically run when you use a the vanilla Send command from ST and on Guided Response before the Response is being generated. They do not run on swipes (where it is expected that they have already run on the initial response and are current). Separated Thinking runs after a normal response is generated and creates a corrected swipe.
                 </small>
                 <div class="setting_item">
                     <div style="display: flex; align-items: center; margin-bottom: 5px;">
@@ -152,6 +159,12 @@
                     <div style="display: flex; align-items: center; margin-bottom: 5px;">
                         <input type="checkbox" id="gg_autoTriggerThinking" name="autoTriggerThinking" class="gg-setting-input">
                         <label for="gg_autoTriggerThinking" style="margin-left: 8px;">Describe Thinking</label>
+                    </div>
+                </div>
+                <div class="setting_item">
+                    <div style="display: flex; align-items: center; margin-bottom: 5px;">
+                        <input type="checkbox" id="gg_autoTriggerSeparatedThinking" name="autoTriggerSeparatedThinking" class="gg-setting-input">
+                        <label for="gg_autoTriggerSeparatedThinking" style="margin-left: 8px;">Separated Thinking</label>
                     </div>
                 </div>
                 <!-- Custom Auto Guide Auto Trigger -->
@@ -175,314 +188,299 @@
                     </small>
                 </div>
                 <hr>
-                <h4>Preset Usage</h4>
-                                <small class="setting_item_description">Assign specific System Prompts (Presets) to different Guided Generation actions. When a preset is selected, it will be temporarily activated just before the guide runs, then deactivated. Use the 'GGSystemPrompt' button to quickly fill the field with the default guidance preset.</small>
+                <details class="gg-collapsible-section">
+                    <summary>
+                        <h4>Preset Usage</h4>
+                        <small class="setting_item_description">Assign a profile and preset baseline to each Guided Generation action. The extension now applies selected profile/preset behavior internally per request (without globally switching your active profile). Select <code>GG Internal Helper Preset</code> to use the built-in helper-oriented prompt/tokens override while keeping your current profile context and model settings as baseline. Select <code>None</code> if you want to run with your currently active preset behavior only.</small>
+                    </summary>
                 
                 <!-- Profile System Controls -->
                 <div class="setting_item" style="margin-bottom: 20px;">
                     <button id="refreshProfileDropdowns" type="button" class="btn btn-secondary" style="margin-right: 10px;">
                         Refresh Profile Dropdowns
                     </button>
-                    <span id="profileDebugStatus" style="font-style: italic; color: var(--SmartThemeBodyColor); opacity: 0.6;"></span>
+                    <button id="gg_setDefaultPresets" type="button" class="btn btn-secondary" title="Set GG Internal Helper Preset as the preset for all eligible guides/tools, leaving their profiles untouched.">
+                        Set Defaults
+                    </button>
+                    <span id="profileDebugStatus" style="font-style: italic; color: var(--SmartThemeBodyColor); opacity: 0.6; margin-left: 10px;"></span>
                 </div>
                 
-                <!-- Safety Timeout Settings -->
                 <div class="setting_item">
-                    <h4>Safety Timeout Settings</h4>
+                    <h4>Internal Helper Preset</h4>
                     <small class="setting_item_description">
-                        Configure safety delays after switching presets and profiles to ensure they have settled before proceeding. These delays help prevent issues with incomplete switches.
+                        Settings for actions using <code>GG Internal Helper Preset</code>.
                     </small>
                     <div style="display: flex; align-items: center; gap: 15px; margin-top: 10px;">
                         <div style="flex: 1; min-width: 0;">
-                            <label for="gg_profileSwitchTimeout" style="margin-bottom: 5px; display: block; font-weight: bold;">Profile Switch Timeout (ms):</label>
-                            <input type="number" id="gg_profileSwitchTimeout" name="profileSwitchTimeout" class="gg-setting-input text_pole" min="0" max="10000" value="500" style="width: 100px;">
-                            <small class="setting_item_description">Delay after profile switch (default: 500ms)</small>
+                            <label for="gg_internalHelperPresetMaxTokens" style="margin-bottom: 5px; display: block; font-weight: bold;">Max Response Tokens:</label>
+                            <input type="number" id="gg_internalHelperPresetMaxTokens" name="internalHelperPresetMaxTokens" class="gg-setting-input text_pole" min="1" max="128000" value="4000" style="width: 100px;">
+                            <small class="setting_item_description">Max tokens the LLM may generate (default: 4000)</small>
                         </div>
                         <div style="flex: 1; min-width: 0;">
-                            <label for="gg_presetSwitchTimeout" style="margin-bottom: 5px; display: block; font-weight: bold;">Preset Switch Timeout (ms):</label>
-                            <input type="number" id="gg_presetSwitchTimeout" name="presetSwitchTimeout" class="gg-setting-input text_pole" min="0" max="10000" value="200" style="width: 100px;">
-                            <small class="setting_item_description">Delay after preset switch (default: 200ms)</small>
+                            <label for="gg_internalHelperPresetMaxContext" style="margin-bottom: 5px; display: block; font-weight: bold;">Max Context Tokens:</label>
+                            <input type="number" id="gg_internalHelperPresetMaxContext" name="internalHelperPresetMaxContext" class="gg-setting-input text_pole" min="0" max="128000" value="0" style="width: 100px;">
+                            <small class="setting_item_description">Total context budget (history + prompt). <code>0</code> = use SillyTavern's global Context Size value.</small>
                         </div>
                     </div>
                 </div>
-                <!-- Preset fields for each guide/tool -->
+                
+                <!-- Preset / Profile assignment per feature.
+                     One shared header row, then one compact 3-column row per feature:
+                     Feature name | Profile dropdown | Preset dropdown. -->
                 <div class="setting_item">
-                    <div style="display: flex; align-items: flex-start; gap: 15px; margin-bottom: 15px;">
-                        <div style="flex: 1; min-width: 0;">
-                            <label for="profileClothes" style="margin-bottom: 5px; display: block; font-weight: bold;">Clothes Guide Profile:</label>
-                            <select id="profileClothes" name="profileClothes" class="gg-setting-input text_pole select_compact" style="width: 100%;">
-                                <option value="">None</option>
-                                <!-- Profile options will be populated by the extension -->
-                            </select>
-                        </div>
-                        <div style="flex: 1; min-width: 0;">
-                            <label for="presetClothes" style="margin-bottom: 5px; display: block; font-weight: bold;">Clothes Guide Preset:</label>
-                            <select id="presetClothes" name="presetClothes" class="gg-setting-input text_pole select_compact" style="width: 100%;">
-                                <!-- Preset options will be populated by the extension -->
-                            </select>
-                        </div>
+                    <!-- Column header row -->
+                    <div style="display: flex; flex-wrap: nowrap; align-items: center; gap: 8px; margin-bottom: 6px; padding-bottom: 4px; border-bottom: 1px solid var(--SmartThemeBodyColor); opacity: 0.85;">
+                        <div style="flex: 0 0 160px; min-width: 0; font-weight: bold;">Feature</div>
+                        <div style="flex: 1 1 0; min-width: 0; font-weight: bold;">Profile</div>
+                        <div style="flex: 1 1 0; min-width: 0; font-weight: bold;">Preset</div>
                     </div>
-                </div>
-                <div class="setting_item">
-                    <div style="display: flex; align-items: center; gap: 10px; margin-bottom: 10px;">
-                        <div style="flex: 1;">
-                            <label for="profileState" style="margin-bottom: 5px; display: block;">State Guide Profile:</label>
-                            <select id="profileState" name="profileState" class="gg-setting-input text_pole select_compact">
-                                <option value="">None</option>
-                                <!-- Profile options will be populated by the extension -->
-                            </select>
-                        </div>
-                        <div style="flex: 1;">
-                            <label for="presetState" style="margin-bottom: 5px; display: block;">State Guide Preset:</label>
-                            <select id="presetState" name="presetState" class="gg-setting-input text_pole select_compact">
-                                <!-- Preset options will be populated by the extension -->
-                            </select>
-                        </div>
-                    </div>
-                </div>
-                <div class="setting_item">
-                    <div style="display: flex; align-items: center; gap: 10px; margin-bottom: 10px;">
-                        <div style="flex: 1;">
-                            <label for="profileThinking" style="margin-bottom: 5px; display: block;">Thinking Guide Profile:</label>
-                            <select id="profileThinking" name="profileThinking" class="gg-setting-input text_pole select_compact">
-                                <option value="">None</option>
-                                <!-- Profile options will be populated by the extension -->
-                            </select>
-                        </div>
-                        <div style="flex: 1;">
-                            <label for="presetThinking" style="margin-bottom: 5px; display: block;">Thinking Guide Preset:</label>
-                            <select id="presetThinking" name="presetThinking" class="gg-setting-input text_pole select_compact">
-                                <!-- Preset options will be populated by the extension -->
-                            </select>
-                        </div>
-                    </div>
-                </div>
-                <div class="setting_item">
-                    <div style="display: flex; align-items: center; gap: 10px; margin-bottom: 10px;">
-                        <div style="flex: 1;">
-                            <label for="profileCustomAuto" style="margin-bottom: 5px; display: block;">Custom Auto Guide Profile:</label>
-                            <select id="profileCustomAuto" name="profileCustomAuto" class="gg-setting-input text_pole select_compact">
-                                <option value="">None</option>
-                                <!-- Profile options will be populated by the extension -->
-                            </select>
-                        </div>
-                        <div style="flex: 1;">
-                            <label for="presetCustomAuto" style="margin-bottom: 5px; display: block;">Custom Auto Guide Preset:</label>
-                            <select id="presetCustomAuto" name="presetCustomAuto" class="gg-setting-input text_pole select_compact">
-                                <!-- Preset options will be populated by the extension -->
-                            </select>
-                        </div>
-                    </div>
-                </div>
 
-                <div class="setting_item">
-                    <div style="display: flex; align-items: center; gap: 10px; margin-bottom: 10px;">
-                        <div style="flex: 1;">
-                            <label for="profileSituational" style="margin-bottom: 5px; display: block;">Situational Guide Profile:</label>
-                            <select id="profileSituational" name="profileSituational" class="gg-setting-input text_pole select_compact">
+                    <!-- Clothes -->
+                    <div style="display: flex; flex-wrap: nowrap; align-items: center; gap: 8px; margin-bottom: 8px;">
+                        <div style="flex: 0 0 160px; min-width: 0;">Clothes</div>
+                        <div style="flex: 1 1 0; min-width: 0;">
+                            <select id="profileClothes" name="profileClothes" class="gg-setting-input text_pole select_compact" style="width: 100%; min-width: 0;">
                                 <option value="">None</option>
-                                <!-- Profile options will be populated by the extension -->
                             </select>
                         </div>
-                        <div style="flex: 1;">
-                            <label for="presetSituational" style="margin-bottom: 5px; display: block;">Situational Guide Preset:</label>
-                            <select id="presetSituational" name="presetSituational" class="gg-setting-input text_pole select_compact">
-                                <!-- Preset options will be populated by the extension -->
+                        <div style="flex: 1 1 0; min-width: 0;">
+                            <select id="presetClothes" name="presetClothes" class="gg-setting-input text_pole select_compact" style="width: 100%; min-width: 0;">
+                            </select>
+                        </div>
+                    </div>
+
+                    <!-- State -->
+                    <div style="display: flex; flex-wrap: nowrap; align-items: center; gap: 8px; margin-bottom: 8px;">
+                        <div style="flex: 0 0 160px; min-width: 0;">State</div>
+                        <div style="flex: 1 1 0; min-width: 0;">
+                            <select id="profileState" name="profileState" class="gg-setting-input text_pole select_compact" style="width: 100%; min-width: 0;">
+                                <option value="">None</option>
+                            </select>
+                        </div>
+                        <div style="flex: 1 1 0; min-width: 0;">
+                            <select id="presetState" name="presetState" class="gg-setting-input text_pole select_compact" style="width: 100%; min-width: 0;">
+                            </select>
+                        </div>
+                    </div>
+
+                    <!-- Thinking -->
+                    <div style="display: flex; flex-wrap: nowrap; align-items: center; gap: 8px; margin-bottom: 8px;">
+                        <div style="flex: 0 0 160px; min-width: 0;">Thinking</div>
+                        <div style="flex: 1 1 0; min-width: 0;">
+                            <select id="profileThinking" name="profileThinking" class="gg-setting-input text_pole select_compact" style="width: 100%; min-width: 0;">
+                                <option value="">None</option>
+                            </select>
+                        </div>
+                        <div style="flex: 1 1 0; min-width: 0;">
+                            <select id="presetThinking" name="presetThinking" class="gg-setting-input text_pole select_compact" style="width: 100%; min-width: 0;">
+                            </select>
+                        </div>
+                    </div>
+
+                    <!-- Custom Auto -->
+                    <div style="display: flex; flex-wrap: nowrap; align-items: center; gap: 8px; margin-bottom: 8px;">
+                        <div style="flex: 0 0 160px; min-width: 0;">Custom Auto</div>
+                        <div style="flex: 1 1 0; min-width: 0;">
+                            <select id="profileCustomAuto" name="profileCustomAuto" class="gg-setting-input text_pole select_compact" style="width: 100%; min-width: 0;">
+                                <option value="">None</option>
+                            </select>
+                        </div>
+                        <div style="flex: 1 1 0; min-width: 0;">
+                            <select id="presetCustomAuto" name="presetCustomAuto" class="gg-setting-input text_pole select_compact" style="width: 100%; min-width: 0;">
+                            </select>
+                        </div>
+                    </div>
+
+                    <!-- Situational -->
+                    <div style="display: flex; flex-wrap: nowrap; align-items: center; gap: 8px; margin-bottom: 8px;">
+                        <div style="flex: 0 0 160px; min-width: 0;">Situational</div>
+                        <div style="flex: 1 1 0; min-width: 0;">
+                            <select id="profileSituational" name="profileSituational" class="gg-setting-input text_pole select_compact" style="width: 100%; min-width: 0;">
+                                <option value="">None</option>
+                            </select>
+                        </div>
+                        <div style="flex: 1 1 0; min-width: 0;">
+                            <select id="presetSituational" name="presetSituational" class="gg-setting-input text_pole select_compact" style="width: 100%; min-width: 0;">
+                            </select>
+                        </div>
+                    </div>
+
+                    <!-- Rules -->
+                    <div style="display: flex; flex-wrap: nowrap; align-items: center; gap: 8px; margin-bottom: 8px;">
+                        <div style="flex: 0 0 160px; min-width: 0;">Rules</div>
+                        <div style="flex: 1 1 0; min-width: 0;">
+                            <select id="profileRules" name="profileRules" class="gg-setting-input text_pole select_compact" style="width: 100%; min-width: 0;">
+                                <option value="">None</option>
+                            </select>
+                        </div>
+                        <div style="flex: 1 1 0; min-width: 0;">
+                            <select id="presetRules" name="presetRules" class="gg-setting-input text_pole select_compact" style="width: 100%; min-width: 0;">
+                            </select>
+                        </div>
+                    </div>
+
+                    <!-- Custom -->
+                    <div style="display: flex; flex-wrap: nowrap; align-items: center; gap: 8px; margin-bottom: 8px;">
+                        <div style="flex: 0 0 160px; min-width: 0;">Custom</div>
+                        <div style="flex: 1 1 0; min-width: 0;">
+                            <select id="profileCustom" name="profileCustom" class="gg-setting-input text_pole select_compact" style="width: 100%; min-width: 0;">
+                                <option value="">None</option>
+                            </select>
+                        </div>
+                        <div style="flex: 1 1 0; min-width: 0;">
+                            <select id="presetCustom" name="presetCustom" class="gg-setting-input text_pole select_compact" style="width: 100%; min-width: 0;">
+                            </select>
+                        </div>
+                    </div>
+
+                    <!-- Corrections -->
+                    <div style="display: flex; flex-wrap: nowrap; align-items: center; gap: 8px; margin-bottom: 8px;">
+                        <div style="flex: 0 0 160px; min-width: 0;">Corrections</div>
+                        <div style="flex: 1 1 0; min-width: 0;">
+                            <select id="profileCorrections" name="profileCorrections" class="gg-setting-input text_pole select_compact" style="width: 100%; min-width: 0;">
+                                <option value="">None</option>
+                            </select>
+                        </div>
+                        <div style="flex: 1 1 0; min-width: 0;">
+                            <select id="presetCorrections" name="presetCorrections" class="gg-setting-input text_pole select_compact" style="width: 100%; min-width: 0;">
+                            </select>
+                        </div>
+                    </div>
+
+                    <!-- Separated Thinking -->
+                    <div style="display: flex; flex-wrap: nowrap; align-items: center; gap: 8px; margin-bottom: 8px;">
+                        <div style="flex: 0 0 160px; min-width: 0;">Separated Thinking</div>
+                        <div style="flex: 1 1 0; min-width: 0;">
+                            <select id="profileSeparatedThinking" name="profileSeparatedThinking" class="gg-setting-input text_pole select_compact" style="width: 100%; min-width: 0;">
+                                <option value="">None</option>
+                            </select>
+                        </div>
+                        <div style="flex: 1 1 0; min-width: 0;">
+                            <select id="presetSeparatedThinking" name="presetSeparatedThinking" class="gg-setting-input text_pole select_compact" style="width: 100%; min-width: 0;">
+                            </select>
+                        </div>
+                    </div>
+
+                    <!-- Spellchecker -->
+                    <div style="display: flex; flex-wrap: nowrap; align-items: center; gap: 8px; margin-bottom: 8px;">
+                        <div style="flex: 0 0 160px; min-width: 0;">Spellchecker</div>
+                        <div style="flex: 1 1 0; min-width: 0;">
+                            <select id="profileSpellchecker" name="profileSpellchecker" class="gg-setting-input text_pole select_compact" style="width: 100%; min-width: 0;">
+                                <option value="">None</option>
+                            </select>
+                        </div>
+                        <div style="flex: 1 1 0; min-width: 0;">
+                            <select id="presetSpellchecker" name="presetSpellchecker" class="gg-setting-input text_pole select_compact" style="width: 100%; min-width: 0;">
+                            </select>
+                        </div>
+                    </div>
+
+                    <!-- Edit Intros -->
+                    <div style="display: flex; flex-wrap: nowrap; align-items: center; gap: 8px; margin-bottom: 8px;">
+                        <div style="flex: 0 0 160px; min-width: 0;">Edit Intros</div>
+                        <div style="flex: 1 1 0; min-width: 0;">
+                            <select id="profileEditIntros" name="profileEditIntros" class="gg-setting-input text_pole select_compact" style="width: 100%; min-width: 0;">
+                                <option value="">None</option>
+                            </select>
+                        </div>
+                        <div style="flex: 1 1 0; min-width: 0;">
+                            <select id="presetEditIntros" name="presetEditIntros" class="gg-setting-input text_pole select_compact" style="width: 100%; min-width: 0;">
+                            </select>
+                        </div>
+                    </div>
+
+                    <!-- Impersonate 1st -->
+                    <div style="display: flex; flex-wrap: nowrap; align-items: center; gap: 8px; margin-bottom: 8px;">
+                        <div style="flex: 0 0 160px; min-width: 0;">Impersonate 1st</div>
+                        <div style="flex: 1 1 0; min-width: 0;">
+                            <select id="profileImpersonate1st" name="profileImpersonate1st" class="gg-setting-input text_pole select_compact" style="width: 100%; min-width: 0;">
+                                <option value="">None</option>
+                            </select>
+                        </div>
+                        <div style="flex: 1 1 0; min-width: 0;">
+                            <select id="presetImpersonate1st" name="presetImpersonate1st" class="gg-setting-input text_pole select_compact" style="width: 100%; min-width: 0;">
+                            </select>
+                        </div>
+                    </div>
+
+                    <!-- Impersonate 2nd -->
+                    <div style="display: flex; flex-wrap: nowrap; align-items: center; gap: 8px; margin-bottom: 8px;">
+                        <div style="flex: 0 0 160px; min-width: 0;">Impersonate 2nd</div>
+                        <div style="flex: 1 1 0; min-width: 0;">
+                            <select id="profileImpersonate2nd" name="profileImpersonate2nd" class="gg-setting-input text_pole select_compact" style="width: 100%; min-width: 0;">
+                                <option value="">None</option>
+                            </select>
+                        </div>
+                        <div style="flex: 1 1 0; min-width: 0;">
+                            <select id="presetImpersonate2nd" name="presetImpersonate2nd" class="gg-setting-input text_pole select_compact" style="width: 100%; min-width: 0;">
+                            </select>
+                        </div>
+                    </div>
+
+                    <!-- Impersonate 3rd -->
+                    <div style="display: flex; flex-wrap: nowrap; align-items: center; gap: 8px; margin-bottom: 8px;">
+                        <div style="flex: 0 0 160px; min-width: 0;">Impersonate 3rd</div>
+                        <div style="flex: 1 1 0; min-width: 0;">
+                            <select id="profileImpersonate3rd" name="profileImpersonate3rd" class="gg-setting-input text_pole select_compact" style="width: 100%; min-width: 0;">
+                                <option value="">None</option>
+                            </select>
+                        </div>
+                        <div style="flex: 1 1 0; min-width: 0;">
+                            <select id="presetImpersonate3rd" name="presetImpersonate3rd" class="gg-setting-input text_pole select_compact" style="width: 100%; min-width: 0;">
+                            </select>
+                        </div>
+                    </div>
+
+                    <!-- Fun Prompts -->
+                    <div style="display: flex; flex-wrap: nowrap; align-items: center; gap: 8px; margin-bottom: 8px;">
+                        <div style="flex: 0 0 160px; min-width: 0;">Fun Prompts</div>
+                        <div style="flex: 1 1 0; min-width: 0;">
+                            <select id="profileFun" name="profileFun" class="gg-setting-input text_pole select_compact" style="width: 100%; min-width: 0;">
+                                <option value="">None</option>
+                            </select>
+                        </div>
+                        <div style="flex: 1 1 0; min-width: 0;">
+                            <select id="presetFun" name="presetFun" class="gg-setting-input text_pole select_compact" style="width: 100%; min-width: 0;">
+                            </select>
+                        </div>
+                    </div>
+
+                    <!-- Stat Tracker: Determine Changes -->
+                    <div style="display: flex; flex-wrap: nowrap; align-items: center; gap: 8px; margin-bottom: 8px;">
+                        <div style="flex: 0 0 160px; min-width: 0;">Tracker: Determine</div>
+                        <div style="flex: 1 1 0; min-width: 0;">
+                            <select id="profileTrackerDetermine" name="profileTrackerDetermine" class="gg-setting-input text_pole select_compact" style="width: 100%; min-width: 0;">
+                                <option value="">None</option>
+                            </select>
+                        </div>
+                        <div style="flex: 1 1 0; min-width: 0;">
+                            <select id="presetTrackerDetermine" name="presetTrackerDetermine" class="gg-setting-input text_pole select_compact" style="width: 100%; min-width: 0;">
+                            </select>
+                        </div>
+                    </div>
+
+                    <!-- Stat Tracker: Update with Changes -->
+                    <div style="display: flex; flex-wrap: nowrap; align-items: center; gap: 8px; margin-bottom: 8px;">
+                        <div style="flex: 0 0 160px; min-width: 0;">Tracker: Update</div>
+                        <div style="flex: 1 1 0; min-width: 0;">
+                            <select id="profileTrackerUpdate" name="profileTrackerUpdate" class="gg-setting-input text_pole select_compact" style="width: 100%; min-width: 0;">
+                                <option value="">None</option>
+                            </select>
+                        </div>
+                        <div style="flex: 1 1 0; min-width: 0;">
+                            <select id="presetTrackerUpdate" name="presetTrackerUpdate" class="gg-setting-input text_pole select_compact" style="width: 100%; min-width: 0;">
                             </select>
                         </div>
                     </div>
                 </div>
-                <div class="setting_item">
-                    <div style="display: flex; align-items: center; gap: 10px; margin-bottom: 10px;">
-                        <div style="flex: 1;">
-                            <label for="profileRules" style="margin-bottom: 5px; display: block;">Rules Guide Profile:</label>
-                            <select id="profileRules" name="profileRules" class="gg-setting-input text_pole select_compact">
-                                <option value="">None</option>
-                                <!-- Profile options will be populated by the extension -->
-                            </select>
-                        </div>
-                        <div style="flex: 1;">
-                            <label for="presetRules" style="margin-bottom: 5px; display: block;">Rules Guide Preset:</label>
-                            <select id="presetRules" name="presetRules" class="gg-setting-input text_pole select_compact">
-                                <!-- Preset options will be populated by the extension -->
-                            </select>
-                        </div>
-                    </div>
-                </div>
-                <div class="setting_item">
-                    <div style="display: flex; align-items: center; gap: 10px; margin-bottom: 10px;">
-                        <div style="flex: 1;">
-                            <label for="profileCustom" style="margin-bottom: 5px; display: block;">Custom Guide Profile:</label>
-                            <select id="profileCustom" name="profileCustom" class="gg-setting-input text_pole select_compact">
-                                <option value="">None</option>
-                                <!-- Profile options will be populated by the extension -->
-                            </select>
-                        </div>
-                        <div style="flex: 1;">
-                            <label for="presetCustom" style="margin-bottom: 5px; display: block;">Custom Guide Preset:</label>
-                            <select id="presetCustom" name="presetCustom" class="gg-setting-input text_pole select_compact">
-                                <!-- Preset options will be populated by the extension -->
-                            </select>
-                        </div>
-                    </div>
-                </div>
-                <div class="setting_item">
-                    <div style="display: flex; align-items: center; gap: 10px; margin-bottom: 10px;">
-                        <div style="flex: 1;">
-                            <label for="profileCorrections" style="margin-bottom: 5px; display: block;">Corrections Profile:</label>
-                            <select id="profileCorrections" name="profileCorrections" class="gg-setting-input text_pole select_compact">
-                                <option value="">None</option>
-                                <!-- Profile options will be populated by the extension -->
-                            </select>
-                        </div>
-                        <div style="flex: 1;">
-                            <label for="presetCorrections" style="margin-bottom: 5px; display: block;">Corrections Preset:</label>
-                            <select id="presetCorrections" name="presetCorrections" class="gg-setting-input text_pole select_compact">
-                                <!-- Preset options will be populated by the extension -->
-                            </select>
-                        </div>
-                    </div>
-                </div>
-                <div class="setting_item">
-                    <div style="display: flex; align-items: center; gap: 10px; margin-bottom: 10px;">
-                        <div style="flex: 1;">
-                            <label for="profileSpellchecker" style="margin-bottom: 5px; display: block;">Spellchecker Profile:</label>
-                            <select id="profileSpellchecker" name="profileSpellchecker" class="gg-setting-input text_pole select_compact">
-                                <option value="">None</option>
-                                <!-- Profile options will be populated by the extension -->
-                            </select>
-                        </div>
-                        <div style="flex: 1;">
-                            <label for="presetSpellchecker" style="margin-bottom: 5px; display: block;">Spellchecker Preset:</label>
-                            <select id="presetSpellchecker" name="presetSpellchecker" class="gg-setting-input text_pole select_compact">
-                                <!-- Preset options will be populated by the extension -->
-                            </select>
-                        </div>
-                    </div>
-                </div>
-                <div class="setting_item">
-                    <div style="display: flex; align-items: center; gap: 10px; margin-bottom: 10px;">
-                        <div style="flex: 1;">
-                            <label for="profileEditIntros" style="margin-bottom: 5px; display: block;">Edit Intros Profile:</label>
-                            <select id="profileEditIntros" name="profileEditIntros" class="gg-setting-input text_pole select_compact">
-                                <option value="">None</option>
-                                <!-- Profile options will be populated by the extension -->
-                            </select>
-                        </div>
-                        <div style="flex: 1;">
-                            <label for="presetEditIntros" style="margin-bottom: 5px; display: block;">Edit Intros Preset:</label>
-                            <select id="presetEditIntros" name="presetEditIntros" class="gg-setting-input text_pole select_compact">
-                                <!-- Preset options will be populated by the extension -->
-                            </select>
-                        </div>
-                    </div>
-                </div>
-                <div class="setting_item">
-                    <div style="display: flex; align-items: center; gap: 10px; margin-bottom: 10px;">
-                        <div style="flex: 1;">
-                            <label for="profileImpersonate1st" style="margin-bottom: 5px; display: block;">Impersonate 1st Profile:</label>
-                            <select id="profileImpersonate1st" name="profileImpersonate1st" class="gg-setting-input text_pole select_compact">
-                                <option value="">None</option>
-                                <!-- Profile options will be populated by the extension -->
-                            </select>
-                        </div>
-                        <div style="flex: 1;">
-                            <label for="presetImpersonate1st" style="margin-bottom: 5px; display: block;">Impersonate 1st Preset:</label>
-                            <select id="presetImpersonate1st" name="presetImpersonate1st" class="gg-setting-input text_pole select_compact">
-                                <!-- Preset options will be populated by the extension -->
-                            </select>
-                        </div>
-                    </div>
-                </div>
-                <div class="setting_item">
-                    <div style="display: flex; align-items: center; gap: 10px; margin-bottom: 10px;">
-                        <div style="flex: 1;">
-                            <label for="profileImpersonate2nd" style="margin-bottom: 5px; display: block;">Impersonate 2nd Profile:</label>
-                            <select id="profileImpersonate2nd" name="profileImpersonate2nd" class="gg-setting-input text_pole select_compact">
-                                <option value="">None</option>
-                                <!-- Profile options will be populated by the extension -->
-                            </select>
-                        </div>
-                        <div style="flex: 1;">
-                            <label for="presetImpersonate2nd" style="margin-bottom: 5px; display: block;">Impersonate 2nd Preset:</label>
-                            <select id="presetImpersonate2nd" name="presetImpersonate2nd" class="gg-setting-input text_pole select_compact">
-                                <!-- Preset options will be populated by the extension -->
-                            </select>
-                        </div>
-                    </div>
-                </div>
-                <div class="setting_item">
-                    <div style="display: flex; align-items: center; gap: 10px; margin-bottom: 10px;">
-                        <div style="flex: 1;">
-                            <label for="profileImpersonate3rd" style="margin-bottom: 5px; display: block;">Impersonate 3rd Profile:</label>
-                            <select id="profileImpersonate3rd" name="profileImpersonate3rd" class="gg-setting-input text_pole select_compact">
-                                <option value="">None</option>
-                                <!-- Profile options will be populated by the extension -->
-                            </select>
-                        </div>
-                        <div style="flex: 1;">
-                            <label for="presetImpersonate3rd" style="margin-bottom: 5px; display: block;">Impersonate 3rd Preset:</label>
-                            <select id="presetImpersonate3rd" name="presetImpersonate3rd" class="gg-setting-input text_pole select_compact">
-                                <!-- Preset options will be populated by the extension -->
-                            </select>
-                        </div>
-                    </div>
-                </div>
-                <div class="setting_item">
-                    <div style="display: flex; align-items: center; gap: 10px; margin-bottom: 10px;">
-                        <div style="flex: 1;">
-                            <label for="profileFun" style="margin-bottom: 5px; display: block;">Fun Prompts Profile:</label>
-<select id="profileFun" name="profileFun" class="gg-setting-input text_pole select_compact">
-                                <option value="">None</option>
-                                <!-- Profile options will be populated by the extension -->
-                            </select>
-                        </div>
-                        <div style="flex: 1;">
-                            <label for="presetFun" style="margin-bottom: 5px; display: block;">Fun Prompts Preset:</label>
-                            <select id="presetFun" name="presetFun" class="gg-setting-input text_pole select_compact">
-                                <!-- Preset options will be populated by the extension -->
-                            </select>
-                        </div>
-                    </div>
-                </div>
-                <div class="setting_item">
-                    <div style="display: flex; align-items: center; gap: 10px; margin-bottom: 10px;">
-                        <div style="flex: 1;">
-                            <label for="profileTrackerDetermine" style="margin-bottom: 5px; display: block;">Stat Tracker: Determine Changes - Profile:</label>
-                            <select id="profileTrackerDetermine" name="profileTrackerDetermine" class="gg-setting-input text_pole select_compact">
-                                <option value="">None</option>
-                                <!-- Profile options will be populated by the extension -->
-                            </select>
-                        </div>
-                        <div style="flex: 1;">
-                            <label for="presetTrackerDetermine" style="margin-bottom: 5px; display: block;">Stat Tracker: Determine Changes - Preset:</label>
-                            <select id="presetTrackerDetermine" name="presetTrackerDetermine" class="gg-setting-input text_pole select_compact">
-                                <!-- Preset options will be populated by the extension -->
-                            </select>
-                        </div>
-                    </div>
-                </div>
-                <div class="setting_item">
-                    <div style="display: flex; align-items: center; gap: 10px; margin-bottom: 10px;">
-                        <div style="flex: 1;">
-                            <label for="profileTrackerUpdate" style="margin-bottom: 5px; display: block;">Stat Tracker: Update with Changes - Profile:</label>
-                            <select id="profileTrackerUpdate" name="profileTrackerUpdate" class="gg-setting-input text_pole select_compact">
-                                <option value="">None</option>
-                                <!-- Profile options will be populated by the extension -->
-                            </select>
-                        </div>
-                        <div style="flex: 1;">
-                            <label for="presetTrackerUpdate" style="margin-bottom: 5px; display: block;">Stat Tracker: Update with Changes - Preset:</label>
-                            <select id="presetTrackerUpdate" name="presetTrackerUpdate" class="gg-setting-input text_pole select_compact">
-                                <!-- Preset options will be populated by the extension -->
-                            </select>
-                        </div>
-                    </div>
-                </div>
+                </details>
                 <hr>
-                <div class="guide-prompt-overrides-section"> <!-- Added wrapper -->
-                    <h4>Guide Prompt Overrides</h4>
-                    <small class="setting_item_description">Customize the instructions sent to the AI for specific guides. Use `&#123;&#123;input&#125;&#125;` where you want the original user text to be inserted (if applicable). Use the 'Default' button to restore the original prompt. Check 'Raw' to send the prompt directly as an STScript command instead of injecting it (advanced use).</small>
+                <details class="guide-prompt-overrides-section gg-collapsible-section"> <!-- Added wrapper -->
+                    <summary>
+                        <h4>Guide Prompt Overrides</h4>
+                        <small class="setting_item_description">By default prompts are loaded from <code>prompts.json</code> in the extension folder. Each prompt has a "Use prompts.json" checkbox — checked (default) means the file is the source, unchecked means your own saved value is used instead. Editing a prompt here unchecks that box automatically so your edit takes effect. Changes made here are saved in SillyTavern user settings and do not rewrite <code>prompts.json</code>. Use <code>&#123;&#123;input&#125;&#125;</code> where you want the original user text to be inserted (if applicable). Raw and Depth controls are still saved here.</small>
+                        <button type="button" id="ggDownloadDefaultPrompts" class="menu_button" style="margin-top: 8px;">Download default prompts.json from GitHub</button>
+                    </summary>
                     <!-- Textareas for overriding default guide prompts -->
                     <div class="setting_item">
                         <label for="gg_promptClothes" style="margin-left: 8px; min-width:150px; display:block;">Clothes Guide Prompt</label>
@@ -562,6 +560,17 @@
                         </div>
                     </div>
                     <div class="setting_item">
+                        <label for="gg_promptSeparatedThinking" style="margin-left: 8px; min-width:150px; display:block;">Separated Thinking Prompt</label>
+                        <textarea id="gg_promptSeparatedThinking" name="promptSeparatedThinking" class="gg-setting-input text_pole" rows="5" style="width:100%; margin-left:8px; min-width:200px;"></textarea>
+                        <div style="display: flex; align-items: center; margin-top: 4px;">
+                            <button type="button" class="gg-default-button" data-target="promptSeparatedThinking" style="margin-top:4px;">Default</button>
+                            <input type="checkbox" id="gg_rawPromptSeparatedThinking" name="rawPromptSeparatedThinking" class="gg-setting-input" style="margin-left:8px;">
+                            <label for="gg_rawPromptSeparatedThinking" style="margin-left:4px;">Raw</label>
+                            <label for="gg_depthPromptSeparatedThinking" style="margin-left:8px;">Depth:</label>
+                            <input type="number" id="gg_depthPromptSeparatedThinking" name="depthPromptSeparatedThinking" class="gg-setting-input" min="0" style="width: 50px; margin-left:4px;">
+                        </div>
+                    </div>
+                    <div class="setting_item">
                         <label for="gg_promptSpellchecker" style="margin-left: 8px; min-width:150px; display:block;">Spellchecker Prompt</label>
                         <textarea id="gg_promptSpellchecker" name="promptSpellchecker" class="gg-setting-input text_pole" rows="3" style="width:100%; margin-left:8px; min-width:200px;"></textarea>
                         <div style="display: flex; align-items: center; margin-top: 4px;">
@@ -604,7 +613,7 @@
                             <label for="gg_depthPromptGuidedSwipe" style="margin-left:8px;">Depth:</label>
                             <input type="number" id="gg_depthPromptGuidedSwipe" name="depthPromptGuidedSwipe" class="gg-setting-input" min="0" style="width: 50px; margin-left:4px;">
                     </div>
-                </div> <!-- Added closing wrapper tag -->
+                </details> <!-- Added closing wrapper tag -->
             </div>
         </div>
     </div>

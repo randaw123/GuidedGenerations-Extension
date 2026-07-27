@@ -1,3 +1,7 @@
+<p align="center">
+  <img src="Media/GG Logo Text.png" alt="Guided Generations" width="600">
+</p>
+
 # Guided Generations Extension for SillyTavern
 
 This extension brings the full power of the original "Guided Generations" Quick Reply set to SillyTavern as a native extension. It provides modular, context-aware tools for shaping, refining, and guiding AI responses—ideal for roleplay, story, and character-driven chats. All features are accessible via intuitive buttons and menus integrated into the SillyTavern UI.
@@ -63,6 +67,7 @@ See [`JSDoc.md`](./JSDoc.md) for code-level documentation.
 ### 🔖 Tools Menu
 *Access additional utilities*
   - **🔧 Corrections:** Edit the last AI message with targeted instructions.
+  - **🧩 Separated Thinking:** Analyze the currently shown AI message against the full chat and generate a corrected version as a new swipe. Can also run automatically after normal replies and swipe generations.
   - **✅ Spellchecker:** Polish your input for grammar, punctuation, and flow.
   - **✈️ Simple Send:** Send input as a user message without triggering a model response.
   - **🖋️ Edit Intros:** Rewrite or transform introductory messages on demand.
@@ -95,6 +100,8 @@ All extension settings are managed via SillyTavern’s Extension Settings panel:
   - Thinking Guide
   - State Guide
   - Clothes Guide
+  - Custom Auto Guide
+  - Separated Thinking, which runs after a generated assistant message and creates a corrected swipe.
 
 - **Buttons Visibility**: show or hide action buttons:
   - 1st Person Impersonation (👤)
@@ -103,24 +110,34 @@ All extension settings are managed via SillyTavern’s Extension Settings panel:
   - Guided Response (🐕)
   - Guided Swipe (👈)
   - Persistent Guides Menu (📖)
+  - Optional tool buttons such as Corrections, Spellchecker, Edit Intros, and Separated Thinking.
 
 - **Injection Role**: select the role (`system`, `assistant`, or `user`) used when injecting instructions.
 
 - **Debug Mode**: when enabled, shows detailed debug information in the browser console. Useful for troubleshooting but can clutter the console during normal use.
 
-- **Presets**: for each guide/tool (Clothes, State, Thinking, Situational, Rules, Custom, Corrections, Spellchecker, Edit Intros, Impersonation 1st/2nd/3rd), choose any SillyTavern preset. Before running a guide/tool, the extension will switch to that preset (and its configured API/model), execute the action, then restore your previous preset—allowing different models per guide.
+- **Presets & Profiles**: for each guide/tool (Clothes, State, Thinking, Situational, Rules, Custom, Corrections, Separated Thinking, Spellchecker, Edit Intros, Fun Prompts, Impersonation 1st/2nd/3rd, and the Stat Tracker's two calls), pick an API connection profile and a preset baseline. The extension builds the request from your selected profile/preset directly (it no longer globally switches your active profile during a guide run), so each tool can use a different model without disrupting your main chat connection.
 
-- **Prompt Overrides**: customize the raw prompt template for each guide/tool. Use `{{input}}` for your input text and other placeholders as supported. Overrides apply to:
+  **GG Internal Helper Preset** is available (and set as the default) for the guides and tools that benefit from a helper-oriented prompt stack — Clothes, State, Thinking, Situational, Rules, Custom, Custom Auto, Corrections, Separated Thinking, Spellchecker, and both Stat Tracker calls. It keeps your current profile's model/context/temperature settings but swaps in a focused helper prompt layout and a configurable Max Response Tokens value (set in the same section). Choose **None** for any of them if you'd rather use your active preset as-is. The internal helper preset is intentionally hidden for Impersonation, Edit Intros, and Fun Prompts, since those need your full chat/character context.
+
+- **Prompt Files and Overrides**: default prompt templates are stored in [`prompts.json`](./prompts.json), so they can be edited outside SillyTavern. By default the extension reads from `prompts.json`. Each prompt in Extension Settings has a **Use prompts.json** checkbox — checked (default) means the file is the source, unchecked means your own saved prompt is used instead. Editing a prompt in settings unchecks that box automatically so your edit takes effect. The settings panel also includes a button to download the default `prompts.json` from GitHub.
+
+  Use `{{input}}` for your input text and other placeholders as supported. Prompt coverage includes:
   - Clothes Guide Prompt
   - State Guide Prompt
   - Thinking Guide Prompt
   - Situational Guide Prompt
   - Rules Guide Prompt
   - Corrections Prompt
+  - Separated Thinking Prompt
   - Spellchecker Prompt
   - Impersonate 1st/2nd/3rd Person Prompts
+  - Guided Continue Prompt
   - Guided Response Prompt
   - Guided Swipe Prompt
+  - Custom Auto Guide Prompt
+  - Edit Intros option and wrapper prompts
+  - Persistent guide injection wrappers and tracker default prompts
 
 ---
 

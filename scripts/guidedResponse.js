@@ -1,7 +1,7 @@
 /**
  * @file Contains the logic for the Guided Response button.
  */
-import { getContext, extension_settings, isGroupChat, setPreviousImpersonateInput, getPreviousImpersonateInput, debugLog } from './persistentGuides/guideExports.js'; // Import from central hub
+import { getContext, extension_settings, isGroupChat, setPreviousImpersonateInput, getPreviousImpersonateInput, debugLog, getPromptValue, fillPromptTemplate, pickGroupMember } from './persistentGuides/guideExports.js'; // Import from central hub
 
 // Import the guide scripts for direct execution
 import thinkingGuide from './persistentGuides/thinkingGuide.js'; // Correct relative path
@@ -28,64 +28,34 @@ const guidedResponse = async () => {
     let stscriptCommand;
 
     // Use user-defined guided response prompt override
-    const promptTemplate = extension_settings[extensionName]?.promptGuidedResponse ?? '';
-    const filledPrompt = promptTemplate.replace('{{input}}', originalInput);
+    const promptTemplate = await getPromptValue('promptGuidedResponse', '', {
+        settings: extension_settings[extensionName],
+    });
+    const filledPrompt = fillPromptTemplate(promptTemplate, { input: originalInput });
     const depth = extension_settings[extensionName]?.depthPromptGuidedResponse ?? 0;
 
-    // Check if it's a group chat using the helper function
+    // For group chats, ask the user which member should respond. If GRS is
+    // installed, this delegates to it; otherwise GG's own selector is used.
+    // Resolves null when the user cancels.
+    let selectedMember = null;
     if (isGroupChat()) {
-        const context = getContext();
-        let characterListJson = '[]'; // Default to empty JSON array
-
-        try {
-            const currentGroupId = context?.groupId; // Optional chaining for safety
-            const groups = context?.groups;         // Optional chaining for safety
-            let characterNames = [];
-
-            if (currentGroupId && groups && Array.isArray(groups)) {
-                const currentGroup = groups.find(group => group.id === currentGroupId);
-
-                if (currentGroup && currentGroup.members && Array.isArray(currentGroup.members)) {
-                    characterNames = currentGroup.members.map(member => {
-                        // Remove .png from the end of the member name if present
-                        if (typeof member === 'string' && member.toLowerCase().endsWith('.png')) {
-                            return member.slice(0, -4);
-                        }
-                        return member;
-                    }).filter(name => name); // Filter out any empty names after processing
-                }
-            }
-
-            if (characterNames.length > 0) {
-                // Convert the array to a JSON string for the /buttons command
-                characterListJson = JSON.stringify(characterNames);
-            } else {
-                console.warn(`[${extensionName}][Response] Processed group members resulted in empty list or group not found.`);
-            }
-        } catch (error) {
-            console.error(`[${extensionName}][Response] Error processing group members from context:`, error);
+        selectedMember = await pickGroupMember();
+        if (!selectedMember) {
+            debugLog('[Response] Group selection cancelled; aborting guided response (no generation).');
+            return;
         }
+    }
 
-        if (characterListJson !== '[]') {
-            // Pass the generated JSON string to the labels parameter
-            stscriptCommand = 
-                `// Group chat logic (JS handled selection list via context)|
-/buttons labels=${characterListJson} "Select member to respond as" |
-/setglobalvar key=selection {{pipe}} |
-/inject id=instruct position=chat ephemeral=true scan=true depth=${depth} role=${injectionRole} ${filledPrompt} |
-/trigger await=true {{getglobalvar::selection}}|
-`;
-        } else {
-            console.warn(`[${extensionName}][Response] Could not get character list for group chat selection. Falling back to single character logic.`);
-            // Fallback to single character logic if character list is empty or invalid
-            stscriptCommand = 
-                `// Single character logic (fallback from group)|
+    if (selectedMember) {
+        const { name, chid, triggerArg } = selectedMember;
+        debugLog(`[Response] Group member selected: ${name} (chid ${chid}, trigger arg ${triggerArg}).`);
+        stscriptCommand =
+            `// Group chat logic (JS selection, safe trigger)|
 /inject id=instruct position=chat ephemeral=true scan=true depth=${depth} role=${injectionRole} ${filledPrompt}|
-/trigger await=true|
+/trigger await=true ${triggerArg}|
 `;
-        }
     } else {
-        stscriptCommand = 
+        stscriptCommand =
             `// Single character logic|
 /inject id=instruct position=chat ephemeral=true scan=true depth=${depth} role=${injectionRole} ${filledPrompt}|
 /trigger await=true|
@@ -96,11 +66,8 @@ const guidedResponse = async () => {
     if (typeof SillyTavern !== 'undefined' && typeof SillyTavern.getContext === 'function') {
         const context = SillyTavern.getContext();
         try {
-            // Execute the main command
             await context.executeSlashCommandsWithOptions(stscriptCommand);
-
             debugLog('[Response] Executed Command:', stscriptCommand); // Log the command
-            
         } catch (error) {
             console.error(`[GuidedGenerations][Response] Error executing Guided Response stscript: ${error}`);
         } finally {

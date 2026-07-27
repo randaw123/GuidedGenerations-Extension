@@ -319,6 +319,25 @@
     margin-bottom: 15px;
 }
 
+.gg-popup-header-actions {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+}
+
+.gg-popup-checkbox {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    font-size: 0.95em;
+    cursor: pointer;
+    user-select: none;
+}
+
+.gg-popup-checkbox input {
+    margin: 0;
+}
+
 .gg-popup-header h2 {
     margin: 0;
     font-size: 1.5em;
@@ -342,6 +361,12 @@
 
 .gg-popup-section {
     margin-bottom: 15px; /* Space between sections */
+}
+
+.gg-popup-note {
+    font-size: 0.9em;
+    opacity: 0.9;
+    margin-top: 6px;
 }
 
 .gg-popup-section h3 {
@@ -426,6 +451,97 @@
 
 .gg-popup-footer .gg-button {
     min-width: 100px; /* Adjust as needed */
+}
+
+.gg-corrections-popup-content {
+    max-width: 800px;
+}
+
+.gg-corrections-message-wrap {
+    position: relative;
+}
+
+/* Persistent highlight layer. Shown only when the textarea is blurred — while
+   the textarea has focus the native selection is authoritative and this layer
+   is hidden, so they never compete. Geometry matches the textarea exactly so the
+   yellow sits on the correct text. */
+.gg-corrections-message-overlay {
+    position: absolute;
+    inset: 0;
+    box-sizing: border-box;
+    width: 100%;
+    margin: 0;
+    padding: 8px;
+    border: 1px solid var(--SmartThemeBorderColor);
+    border-radius: 5px;
+    font: inherit;
+    line-height: 1.4;
+    white-space: pre-wrap;
+    overflow-wrap: break-word;
+    word-break: break-word;
+    color: var(--SmartThemeBodyColor);
+    background: var(--SmartThemeBlurTintColor);
+    pointer-events: none;
+    z-index: 1;
+    overflow: hidden;
+    scrollbar-width: none;
+    -ms-overflow-style: none;
+    display: none;
+}
+
+.gg-corrections-message-overlay::-webkit-scrollbar {
+    display: none;
+}
+
+.gg-corrections-message {
+    box-sizing: border-box;
+    width: 100%;
+    margin: 0;
+    padding: 8px;
+    border: 1px solid var(--SmartThemeBorderColor);
+    border-radius: 5px;
+    font: inherit;
+    line-height: 1.4;
+    white-space: pre-wrap;
+    overflow-wrap: break-word;
+    word-break: break-word;
+    resize: vertical;
+    overflow: auto;
+}
+
+/* Recolor the native selection inside the corrections textarea so the
+   highlighted text matches the persistent overlay color. */
+.gg-corrections-message::selection {
+    background-color: rgba(255, 215, 0, 0.45);
+    color: var(--SmartThemeBodyColor);
+}
+
+.gg-corrections-message::-moz-selection {
+    background-color: rgba(255, 215, 0, 0.45);
+    color: var(--SmartThemeBodyColor);
+}
+
+.gg-corrections-selection {
+    background-color: rgba(255, 215, 0, 0.45);
+    color: var(--SmartThemeBodyColor);
+}
+
+.gg-corrections-nav {
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+}
+
+.gg-corrections-nav-row {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+}
+
+.gg-corrections-info {
+    flex: 1;
+    text-align: center;
+    font-weight: 500;
 }
 
 .gg-button {
@@ -610,4 +726,123 @@
         padding: 12px;
         font-size: 0.85em;
     }
+}
+
+/* Version badge in the Guided Generations settings header (top-right) */
+.gg-version-badge {
+    margin-left: auto;
+    margin-right: 8px;
+    padding: 1px 6px;
+    font-size: 0.75em;
+    font-weight: normal;
+    line-height: 1.4;
+    color: var(--SmartThemeBodyColor, #fff);
+    background: var(--black30a, rgba(0, 0, 0, 0.3));
+    border: 1px solid var(--white30a, rgba(255, 255, 255, 0.3));
+    border-radius: 8px;
+    opacity: 0.85;
+    pointer-events: none;
+    user-select: none;
+}
+
+/* ------------------------------------------------------------------ */
+/* Group member picker (fallback when STGroupResponderSelector absent) */
+/* ------------------------------------------------------------------ */
+.gg-group-picker-dialog {
+    position: fixed;
+    z-index: 100000;
+    background-color: var(--SmartThemeBlurTintColor);
+    color: var(--SmartThemeBodyColor);
+    border: 1px solid var(--SmartThemeBorderColor);
+    border-radius: 10px;
+    box-shadow: 0 4px 8px var(--SmartThemeShadowColor);
+    -webkit-backdrop-filter: blur(var(--SmartThemeBlurStrength));
+    backdrop-filter: blur(var(--SmartThemeBlurStrength));
+    width: min(360px, 92vw);
+    /* Cap height so the dialog never fills the whole viewport; remaining
+       overflow scrolls inside the list. Bottom is set dynamically by
+       groupSelection.js to float above the GG action-button row. */
+    max-height: 60vh;
+    overflow-y: auto;
+    padding: 12px 14px 14px;
+}
+
+.gg-group-picker-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 8px;
+    padding-bottom: 8px;
+    margin-bottom: 8px;
+    border-bottom: 1px solid var(--SmartThemeBorderColor);
+}
+
+.gg-group-picker-header h3 {
+    margin: 0;
+    font-size: 1.1em;
+    color: var(--SmartThemeBodyColor);
+}
+
+.gg-group-picker-close {
+    background: transparent;
+    border: none;
+    color: var(--SmartThemeBodyColor);
+    font-size: 22px;
+    line-height: 1;
+    cursor: pointer;
+    padding: 0 4px;
+}
+
+.gg-group-picker-close:hover {
+    color: var(--SmartThemeBorderColor);
+}
+
+.gg-group-picker-list {
+    list-style: none;
+    margin: 0;
+    padding: 0;
+    display: flex;
+    flex-direction: column;
+    gap: 2px;
+}
+
+.gg-group-picker-item {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    padding: 6px 8px;
+    border-radius: 6px;
+    cursor: pointer;
+    user-select: none;
+}
+
+.gg-group-picker-item:hover,
+.gg-group-picker-item:focus-visible {
+    background-color: var(--white30a, rgba(255, 255, 255, 0.07));
+    outline: none;
+}
+
+.gg-group-picker-item--muted {
+    opacity: 0.45;
+}
+
+.gg-group-picker-avatar {
+    flex: 0 0 auto;
+    width: 32px;
+    height: 32px;
+    border-radius: 50%;
+    object-fit: cover;
+    object-position: center;
+    box-shadow: 0 0 5px var(--black50a);
+}
+
+body.square-avatars .gg-group-picker-avatar {
+    border-radius: 2px;
+}
+
+.gg-group-picker-name {
+    flex: 1 1 auto;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
 }
